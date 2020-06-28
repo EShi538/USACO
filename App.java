@@ -1,52 +1,102 @@
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 
 public class App {
     static Scanner in = new Scanner(System.in);
-    static int[][] matrix = new int[5][5];
-    static Set<Integer> nums = new HashSet<Integer>();
-    static int[] dx = {0, 1, 0, -1};
-    static int[] dy = {-1, 0, 1, 0};
-
-    public static void DFS (point st, int currNum, int depth){
-        if(depth == 6){
-            nums.add(currNum);
+    static int n = in.nextInt();
+    static char[][] board = new char[n][n];
+    static List<coordinate> points = new ArrayList<coordinate>();
+    static boolean[][] visited = new boolean[n][n];
+    static int[] dx = {1, 1, -1, -1};
+    static int[] dy = {-1, 1, 1, -1};
+    static boolean finished = false;
+    public static void DFS(int x, int y){
+        if(finished == true){
             return;
         }
+        if(done()){
+            finished = true;
+            return;
+        }
+        visited[y][x] = true;
         for(int i = 0; i < 4; i++){
-            int nx = st.x + dx[i];
-            int ny = st.y + dy[i];
-            if(inBound(nx, ny)){
-                DFS(new point(nx, ny), currNum + (int)(matrix[ny][nx] * Math.pow(10, depth)), depth + 1);
+            int nx1 = x + dx[i];
+            int ny1 = y + dy[i];
+            int nx = x + 2 * dx[i];
+            int ny = y + 2 * dy[i];
+            if(inBound(nx, ny) && visited[ny][nx] == false && board[ny][nx] == '+' && board[ny1][nx1] == 'o'){
+                points.add(new coordinate(ny, nx));
+                board[ny1][nx1] = 'x';
+                DFS(nx, ny);
+                if(finished == false){
+                    points.remove(points.size() - 1);
+                }
+                board[ny1][nx1] = 'o';
+                visited[ny][nx] = false;
             }
         }
+        return;
     }
 
+    public static boolean done(){
+        for(int i = 0; i < n; i++){
+            for(int j = 0; j < n; j++){
+                if(board[i][j] == 'o'){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
     public static boolean inBound(int x, int y){
-        return x >= 0 && x < 5 && y >= 0 && y < 5;
+        return x >= 0 && x < n && y >= 0 && y < n;
     }
-
     public static void main(String[] args) throws Exception {
-        for(int i = 0; i < 5; i++){
-            for(int j = 0; j < 5; j++){
-                matrix[i][j] = in.nextInt();
+        int min = Integer.MAX_VALUE;
+        boolean impossible = true;
+        char[][] temp = new char[n][n];
+        for(int i = 0; i < n; i++){
+            String row = in.next();
+            char[] chArr = row.toCharArray();
+            board[i] = chArr;
+            temp[i] = chArr;
+        }
+        List<coordinate> best = new ArrayList<coordinate>();
+        for(int i = 0; i < n; i++){
+            for(int j = 0; j < n; j++){
+                if(board[i][j] == 'K'){
+                    points.add(new coordinate(i, j));
+                    DFS(j, i);
+                    visited = new boolean[n][n];
+                    if(finished == true){
+                        finished = false;
+                        if(points.size() < min){
+                            min = points.size();
+                            impossible = false;
+                            best = new ArrayList<coordinate>(points);
+                        }
+                    }
+                    points.clear();
+                }
             }
         }
-        for(int i = 0; i < 5;i++){
-            for(int j = 0; j < 5; j++){
-                DFS(new point(j, i), 0, 0);
+        if(impossible == false){
+            for(coordinate i: best){
+                System.out.println((i.y + 1) + " " + (i.x + 1));
             }
         }
-        System.out.print(nums.size());
+        else{
+            System.out.println("impossible");
+        }
     }
 }
 
-class point{
-    int x;
+class coordinate{
     int y;
-    public point(int x, int y){
-        this.x = x;
+    int x;
+    public coordinate(int y, int x){
         this.y = y;
+        this.x = x;
     }
 }
