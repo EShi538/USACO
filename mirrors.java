@@ -1,6 +1,6 @@
 import java.io.*;
 import java.util.*;
-public class App {
+public class mirrors {
     static int n;
     static int m;
     static char[][] mirrors;
