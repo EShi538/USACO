@@ -1,62 +1,63 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.StringTokenizer;
-
+import java.io.*;
+import java.util.*;
 public class berries {
+    static int n, k;
     public static void main(String[] args) throws Exception{
         FileReader reader = new FileReader("berries.in");
         BufferedReader in = new BufferedReader(reader);
         StringTokenizer st = new StringTokenizer(in.readLine());
-        int n = Integer.parseInt(st.nextToken());
+        File out = new File("berries.out");
+        PrintWriter writer = new PrintWriter(out);
+        n = Integer.parseInt(st.nextToken());
         int k = Integer.parseInt(st.nextToken());
-        st = new StringTokenizer(in.readLine());
         int[] trees = new int[n];
-        int max = -1;
+        st = new StringTokenizer(in.readLine());
+        int max = 0;
         for(int i = 0; i < n; i++){
             trees[i] = Integer.parseInt(st.nextToken());
-            if(trees[i] > max){
-                max = trees[i];
-            }
-        } 
+            max = Math.max(max, trees[i]);
+        }
         in.close();
 
-        List<Integer> chunks = new ArrayList<Integer>();
-        int ans = -1;
+        int ans = 0;
         for(int i = 1; i <= max; i++){
-            for(int j = 0; j < trees.length; j++){
-                for(int e = 0; e < trees[j]/i; e++){
-                    chunks.add(i);
+            TreeMap<Integer, Integer> map = new TreeMap<>();
+            for(int j : trees){
+                int times = j / i;
+                int remainder = j % i;
+                if(!map.containsKey(i)){
+                    map.put(i, times);
                 }
-                if(trees[j] % i != 0){
-                    chunks.add(trees[j] % i);
+                else{
+                    map.put(i, map.get(i) + times);
+                }
+                if(remainder != 0) {
+                    if (!map.containsKey(remainder)) {
+                        map.put(remainder, 1);
+                    } else {
+                        map.put(remainder, map.get(remainder) + 1);
+                    }
                 }
             }
-            Collections.sort(chunks);
-            int cnt = 0;
-            int sum = 0;
-            for(int j = chunks.size() - 1; j >= 0; j--){
-                if(cnt == k){
+            int[] basket = new int[k];
+            for(int j = 0; j < k; j++){
+                if(map.isEmpty()){
                     break;
                 }
-                if(cnt >= k/2){
-                    sum = sum + chunks.get(j);
+                basket[j] = map.lastKey();
+                map.put(map.lastKey(), map.get(map.lastKey()) - 1);
+                if(map.get(map.lastKey()) == 0){
+                    map.remove(map.lastKey());
                 }
-                cnt++;
             }
-            if(sum > ans){
-                ans = sum;
+            Arrays.sort(basket);
+            int sum = 0;
+            for(int j = 0; j < k/2; j++){
+                sum += basket[j];
             }
-            chunks.clear();
+            ans = Math.max(sum, ans);
         }
-        File out = new File("berries.out");
-        FileWriter writer = new FileWriter(out);
-        writer.write(Integer.toString(ans));
+        writer.println(ans);
         writer.close();
     }
-
 }
