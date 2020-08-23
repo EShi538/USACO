@@ -1,68 +1,92 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-
-public class App {
-    static Scanner in = new Scanner(System.in);
-    static int n = in.nextInt();
-    static List<cow> cows = new ArrayList<cow>();
-    static List<ArrayList<cow>> adjList = new ArrayList<ArrayList<cow>>();
-    static boolean[] visited = new boolean[n];
-    static int count = 1;
-
-    public static void DFS(cow node){
-        visited[node.ID] = true;
-        ArrayList<cow> adj = adjList.get(node.ID);
-        for(int i = 0; i < adj.size(); i++){
-            cow nNode = adj.get(i);
-            if(visited[nNode.ID] == false && distance(node.x, node.y, nNode.x, nNode.y) <= Math.pow(node.signal, 2)){
-                count++;
-                DFS(nNode);
-            }
-        }
-        return;
-    }
-
-    public static int distance(int x, int y, int x1, int y1){
-        return (int)(Math.pow((Math.abs(x - x1)), 2) + Math.pow((Math.abs(y - y1)), 2));
-    }
-
+import java.io.*;
+import java.util.*;
+public class moocast {
+    static int n;
+    static List<point> points = new ArrayList<>();
+    static boolean[] visited;
+    static boolean[] works;
+    static boolean done;
     public static void main(String[] args) throws Exception {
+        FileReader reader = new FileReader("moocast.in");
+        BufferedReader in = new BufferedReader(reader);
+        File out = new File("moocast.out");
+        PrintWriter writer = new PrintWriter(out);
+        n = Integer.parseInt(in.readLine());
+        visited = new boolean[n];
+        works = new boolean[n];
         for(int i = 0; i < n; i++){
-            cows.add(new cow(i, in.nextInt(), in.nextInt(), in.nextInt()));
+            StringTokenizer st = new StringTokenizer(in.readLine());
+            int x = Integer.parseInt(st.nextToken()), y = Integer.parseInt(st.nextToken());
+            points.add(new point(x, y));
         }
-        for(int i = 0; i < n; i++){
-            adjList.add(new ArrayList<cow>());
-            for(int j = 0; j < n; j++){
-                if(i == j){
+        in.close();
+        writer.println(solve());
+        writer.close();
+    }
+    static int solve(){
+        int ans = Integer.MAX_VALUE, l = 0, r = Integer.MAX_VALUE;
+        while(l <= r){
+            int m = (l + r)/2;
+            boolean valid = true;
+            works = new boolean[n];
+            for(int i = 0; i < n; i++){
+                done = false;
+                visited = new boolean[n];
+                dfs(i, m);
+                if(done){
+                    works[i] = true;
                     continue;
                 }
-                adjList.get(i).add(new cow(j, cows.get(j).x, cows.get(j).y, cows.get(j).signal));
+                if(!good(visited)){
+                    valid = false;
+                    break;
+                }
+                works[i] = true;
+            }
+            if(valid){
+                ans = Math.min(ans, m);
+                r = m - 1;
+            }
+            else{
+                l = m + 1;
             }
         }
-        int max = Integer.MIN_VALUE;
+        return ans;
+    }
+    static void dfs(int node, int m){
+        visited[node] = true;
         for(int i = 0; i < n; i++){
-            cow curr = cows.get(i);
-            DFS(curr);
-            visited = new boolean[n];
-            if(count > max){
-                max = count;
+            if(i == node){
+                continue;
             }
-            count = 1;
+            if(works[i]){
+                done = true;
+                return;
+            }
+            if(!visited[i] && dist(points.get(node).x, points.get(node).y, points.get(i).x, points.get(i).y) <= m){
+                dfs(i, m);
+                if(done){
+                    return;
+                }
+            }
         }
-        System.out.println(max);
+    }
+    static int dist(int x, int y, int x1, int y1){
+        return (int)Math.pow(x - x1, 2) + (int)Math.pow(y - y1, 2);
+    }
+    static boolean good(boolean[] arr){
+        for(boolean i: arr){
+            if(!i){
+                return false;
+            }
+        }
+        return true;
     }
 }
-
-class cow{
-    int ID;
-    int x;
-    int y;
-    int signal;
-    public cow(int ID, int x, int y, int signal){
-        this.ID = ID;
+class point{
+    int x, y;
+    public point(int x, int y){
         this.x = x;
         this.y = y;
-        this.signal = signal;
     }
 }
