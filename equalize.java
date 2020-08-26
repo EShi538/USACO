@@ -1,6 +1,6 @@
 import java.io.*;
 import java.util.*;
-public class pairing {
+public class equalize {
     public static void main(String[] args) throws Exception{
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         int n = Integer.parseInt(in.readLine());
@@ -22,9 +22,6 @@ public class pairing {
                 num /= d;
             }
             lst.get(i).add(0);
-        }
-        for(ArrayList<Integer> i: lst){
-            System.out.println(i);
         }
         Map<Integer, Integer> map = new HashMap<>();
         Map<Integer, List<Integer>> map1 = new HashMap<>();
