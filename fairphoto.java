@@ -1,92 +1,77 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
-
+import java.io.*;
+import java.util.*;
 public class fairphoto {
-
-	public static void main(String[] args) {
-		//input
-		Scanner in = new Scanner(System.in);
-		int n = in.nextInt();
-		List<vache> cows = new ArrayList<vache>();
-		for(int i = 0; i < n; i++) {
-			cows.add(new vache(in.nextInt(), in.next().charAt(0)));
-		}
-		in.close();
-		
-		//code
-		Collections.sort(cows, new sortPosition());
-        HashMap<Integer, Integer> used = new HashMap<Integer, Integer>(); 
-		int[] checks = new int[n];
-		for(int i = 0; i < n; i++) {
-			if(cows.get(i).breed == 'G') {
-				checks[i] = 1;
-			}
-			else {
-				checks[i] = -1;
-			}
-		}
-		int[] PS = new int[n + 1];
-		int[] positions = new int[n + 1];
-		for(int i = 1; i <= n; i++) {
-			PS[i] = PS[i - 1] + checks[i - 1];
-			positions[i] = cows.get(i - 1).position;
-		}
-		int max = Integer.MIN_VALUE;
-		used.put(0, 0);
-		for(int i = 1; i <= n; i++) {
-			if(used.containsKey(PS[i])) {
-				int dist = (positions[i] - positions[used.get(PS[i]) + 1]);
-				if(dist > max) {
-					max = dist;
-				}
-			}
-			else {
-				used.put(PS[i], i);
-			}
-		}
-		char first = cows.get(0).breed;
-		int firstPosition = cows.get(0).position;
-		int maxCnt = Integer.MIN_VALUE;
-		for(int i = 0; i < n; i++) {
-			if (i == n - 1) {
-				maxCnt = cows.get(i).position - firstPosition;
-				break;
-			}
-			if(cows.get(i + 1).breed == first) {
-				continue;
-			}
-			else {
-				int distance = cows.get(i).position - firstPosition;
-				first = cows.get(i + 1).breed;
-				firstPosition = cows.get(i + 1).position;
-				if(distance > maxCnt) {
-					maxCnt = distance;
-				}
-				continue;
-			}
-		}
-		if(maxCnt > max) {
-			max = maxCnt;
-		}
-		System.out.println(max);
-	}
+    static int n;
+    static List<cow> cows = new ArrayList<>();
+    static int[] PS;
+    public static void main(String[] args) throws Exception{
+        BufferedReader in = new BufferedReader(new FileReader("fairphoto.in"));
+        PrintWriter out = new PrintWriter(new File("fairphoto.out"));
+        n = Integer.parseInt(in.readLine());
+        PS = new int[n];
+        for(int i = 0; i < n; i++){
+            StringTokenizer st = new StringTokenizer(in.readLine());
+            int pos = Integer.parseInt(st.nextToken());
+            char type = st.nextToken().charAt(0);
+            cows.add(new cow(pos, type));
+        }
+        in.close();
+        cows.sort(new sort());
+        int hCnt = 0, gCnt = 0;
+        for(int i = 0; i < n; i++){
+            if(cows.get(i).type == 'H'){
+                hCnt++;
+            }
+            else{
+                gCnt++;
+            }
+            PS[i] = hCnt - gCnt;
+        }
+        Map<Integer, Integer> firstOcc = new HashMap<>();
+        Map<Integer, Integer> lastOcc = new HashMap<>();
+        firstOcc.put(0, -1);
+        for(int i = 0; i < n; i++){
+            if(!firstOcc.containsKey(PS[i])){
+                firstOcc.put(PS[i], i);
+            }
+        }
+        for(int i = 0; i < n; i++){
+            lastOcc.put(PS[i], i);
+        }
+        int ans = 0;
+        for(int i: lastOcc.keySet()){
+            int length;
+            if(firstOcc.get(i) != n - 1) {
+                length = cows.get(lastOcc.get(i)).pos - cows.get(firstOcc.get(i) + 1).pos;
+            }
+            else{
+                length = 0;
+            }
+            ans = Math.max(length, ans);
+        }
+        int start = 0;
+        char curr = cows.get(0).type;
+        for(int i = 0; i < n; i++){
+            if(cows.get(i).type != curr){
+                ans = Math.max(ans, cows.get(i - 1).pos - cows.get(start).pos);
+                start = i;
+                curr = cows.get(i).type;
+            }
+        }
+        out.println(ans);
+        out.close();
+    }
 }
-
-class vache{
-	int position;
-	char breed;
-	public vache(int position, char breed) {
-		this.position = position;
-		this.breed = breed;
-	}
+class cow{
+    int pos;
+    char type;
+    public cow(int pos, char type){
+        this.pos = pos;
+        this.type = type;
+    }
 }
-
-class sortPosition implements Comparator<vache> { 
-    public int compare(vache a, vache b){ 
-        return a.position - b.position; 
-    } 
-} 
+class sort implements Comparator<cow>{
+    public int compare(cow a, cow b){
+        return a.pos - b.pos;
+    }
+}
