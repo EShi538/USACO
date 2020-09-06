@@ -3,42 +3,39 @@ import java.util.*;
 public class B {
     public static void main(String[] args) throws Exception{
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        PrintWriter out = new PrintWriter(System.out);
         int t = Integer.parseInt(in.readLine());
         for(int i = 0; i < t; i++){
+            int n = Integer.parseInt(in.readLine());
             StringTokenizer st = new StringTokenizer(in.readLine());
-            int n = Integer.parseInt(st.nextToken());
-            long k = Long.parseLong(st.nextToken());
-            int[] arr = new int[n];
-            st = new StringTokenizer(in.readLine());
+            int[] a = new int[n];
             for(int j = 0; j < n; j++){
-                arr[j] = Integer.parseInt(st.nextToken());
+                a[j] = Integer.parseInt(st.nextToken());
             }
-            int max = Integer.MIN_VALUE;
-            for(int j: arr){
-                max = Math.max(j, max);
-            }
-            int[] A = new int[n], B = new int[n];
+            int p = 1;
             for(int j = 0; j < n; j++){
-                A[j] = max - arr[j];
+                if(a[j] < 0){
+                    continue;
+                }
+                p = Math.max(p, j + 1);
+                while(p < n && a[p] >= 0){
+                    p++;
+                }
+                if (p == n) {
+                    break;
+                }
+                int c = a[j];
+                a[j] = 0;
+                a[p] = a[p] + c;
             }
-            max = Integer.MIN_VALUE;
-            for(int j: A){
-                max = Math.max(j, max);
-            }
-            for(int j = 0; j < n; j++){
-                B[j] = max - A[j];
-            }
-            if(k % 2 == 0){
-                for(int j: B){
-                    System.out.print(j + " ");
+            long sum = 0;
+            for(int j: a){
+                if(j > 0){
+                    sum += j;
                 }
             }
-            else{
-                for(int j: A){
-                    System.out.print(j + " ");
-                }
-            }
-            System.out.println();
+            out.println(sum);
         }
+        out.close();
     }
 }
