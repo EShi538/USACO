@@ -1,66 +1,52 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.util.Arrays;
-import java.util.StringTokenizer;
-
+import java.io.*;
+import java.util.*;
 public class convention {
-    public static void main(String[] args) throws Exception {
-        FileReader reader = new FileReader("convention.in");
-        BufferedReader in = new BufferedReader(reader);
+    static int n, m, c;
+    static int[] a;
+    public static void main(String[] args) throws Exception{
+        BufferedReader in = new BufferedReader(new FileReader("convention.in"));
+        PrintWriter out = new PrintWriter(new File("convention.out"));
         StringTokenizer st = new StringTokenizer(in.readLine());
-        int n = Integer.parseInt(st.nextToken());
-        int m = Integer.parseInt(st.nextToken());
-        int c = Integer.parseInt(st.nextToken());
-        int[] arrivals = new int[n];
+        n = Integer.parseInt(st.nextToken());
+        m = Integer.parseInt(st.nextToken());
+        c = Integer.parseInt(st.nextToken());
         st = new StringTokenizer(in.readLine());
+        a = new int[n];
         for(int i = 0; i < n; i++){
-            arrivals[i] = Integer.parseInt(st.nextToken());
+            a[i] = Integer.parseInt(st.nextToken());
         }
         in.close();
-
-        Arrays.sort(arrivals);
-
-        int lb = 0;
-        int ub = (int)Math.pow(10, 9);
-        int min = Integer.MAX_VALUE;
-        while(lb != ub){
-            int guess = (lb + ub)/2;
-            if(busCnt(guess, arrivals, c) == m){
-                if(guess < min){
-                    min = guess;
-                }
-                ub = guess;
-            }
-            else if(busCnt(guess, arrivals, c) < m){
-                ub = guess;
+        Arrays.sort(a);
+        out.println(solve());
+        out.close();
+    }
+    static int solve(){
+        int ans = Integer.MAX_VALUE, l = 0, r = Integer.MAX_VALUE;
+        while(l <= r){
+            int mid = (l + r)/2;
+            if(valid(mid)){
+                r = mid - 1;
+                ans = Math.min(ans, mid);
             }
             else{
-                lb = guess + 1;
+                l = mid + 1;
             }
         }
-        File out = new File("convention.out");
-        FileWriter writer = new FileWriter(out);
-        writer.write(Integer.toString(lb));
-        writer.close();
+        return ans;
     }
-
-    public static int busCnt(int guess, int[] arrivals, int c){
-        int cnt = 0;
-        int st = arrivals[0];
-        int ind = 0;
-        while(ind < arrivals.length){
-            int size = 0;
-            while(ind < arrivals.length && arrivals[ind] <= st + guess && size < c){
-                size++;
-                ind++;
+    static boolean valid(int mid){
+        int busCnt = 0;
+        for(int i = 0; i < n; i++){
+            int p = i;
+            int max = a[i] + mid;
+            int cnt = 0;
+            while(p < n && a[p] <= max && cnt < c){
+                p++;
+                cnt++;
             }
-            cnt++;
-            if(ind < arrivals.length){
-                st = arrivals[ind];
-            }
+            i = p - 1;
+            busCnt++;
         }
-        return cnt;
+        return busCnt <= m;
     }
 }
