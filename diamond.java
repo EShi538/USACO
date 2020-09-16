@@ -1,80 +1,57 @@
 import java.io.*;
 import java.util.*;
 public class diamond {
-    public static void main(String[] args) throws Exception {
-        //input
-        FileReader reader = new FileReader("diamond.in");
-        BufferedReader in = new BufferedReader(reader);
+    static int n, k;
+    static int[] d;
+    public static void main(String[] args) throws Exception{
+        BufferedReader in = new BufferedReader(new FileReader("diamond.in"));
+        PrintWriter out = new PrintWriter(new File("diamond.out"));
         StringTokenizer st = new StringTokenizer(in.readLine());
-        int n = Integer.parseInt(st.nextToken());
-        int k = Integer.parseInt(st.nextToken());
-        List<Integer> diamonds = new ArrayList<Integer>();
-        for (int i = 0; i < n; i++) {
-            diamonds.add(Integer.parseInt(in.readLine()));
+        n = Integer.parseInt(st.nextToken());
+        k = Integer.parseInt(st.nextToken());
+        d = new int[n];
+        for(int i = 0; i < n; i++){
+            d[i] = Integer.parseInt(in.readLine());
         }
         in.close();
-        Collections.sort(diamonds);
-
-        TreeSet<Integer> sizes = new TreeSet<Integer>(diamonds);
-        List<List<Integer>> mapUpper = new ArrayList<List<Integer>>();
-        List<List<Integer>> mapLower = new ArrayList<List<Integer>>();
-        int index = 0;
-        for (int i : diamonds) {
-            int lowerTarget = sizes.tailSet(i - k).first();
-            int lower = binSearch(lowerTarget, -1, diamonds);
-            int upperTarget = sizes.headSet(i + k, true).last();
-            int upper = binSearch(upperTarget, 1, diamonds);
-            mapUpper.add(diamonds.subList(index, upper + 1));
-            mapLower.add(diamonds.subList(lower, index + 1));
-            index++;
-        }
-        int[] maxBefore = new int[n];
-        for (int i = 0; i < n; i++) {
-            if (i == 0) {
-                maxBefore[0] = mapLower.get(0).size();
-                continue;
-            }
-            maxBefore[i] = Math.max(mapLower.get(i).size(), maxBefore[i - 1]);
-        }
-        int max = -1;
+        Arrays.sort(d);
+        int ans = -1;
+        int maxlSeg = -1;
         for(int i = 0; i < n; i++){
-            int before = -1;
-            if(i != 0){
-                before = maxBefore[i - 1];
-            }
-            else{
-                before = 0;
-            }
-            if(before + mapUpper.get(i).size() > max){
-                max = before + mapUpper.get(i).size();
-            }
-        }
-        File out = new File("diamond.out");
-        FileWriter writer = new FileWriter(out);
-        writer.write(Integer.toString(max));
-        writer.close();
-    }
-    static int binSearch(int target, int direction, List<Integer> diamonds){
-        int lb = 0;
-        int ub = diamonds.size();
-        while(lb != ub){
-            int m = (lb + ub)/2;
-            if(diamonds.get(m) == target){
-                int index = m;
-                while(index >= 0 && index < diamonds.size() && diamonds.get(index).equals(diamonds.get(m))){
-                    index = index + direction;
+            int r = Arrays.binarySearch(d, i, n, d[i] + k);
+            int rSeg;
+            if(r >= 0) {
+                int p = r;
+                while(p < n && d[p] == d[i] + k) {
+                    p++;
                 }
-                index = index - direction;
-                lb = index;
-                ub = index;
-            }
-            else if(diamonds.get(m) < target){
-                lb = m + 1;
+                r = p - 1;
+                rSeg = r - i + 1;
             }
             else{
-                ub = m;
+                r = -(r + 1);
+                rSeg = r - i;
             }
+            int l = (i != 0) ? Arrays.binarySearch(d, 0, i, d[i - 1] - k) : 0;
+            int lSeg;
+            if(i != 0) {
+                if (l >= 0) {
+                    int p = l;
+                    boolean looped = false;
+                    while (p >= 0 && d[p] == d[i - 1] - k) {
+                        looped = true;
+                        p--;
+                    }
+                    l = (looped) ? p + 1 : p;
+                } else {
+                    l = -(l + 1);
+                }
+            }
+            lSeg = i - l;
+            maxlSeg = Math.max(lSeg, maxlSeg);
+            ans = Math.max(ans, rSeg + maxlSeg);
         }
-        return lb;
+        out.println(ans);
+        out.close();
     }
 }
