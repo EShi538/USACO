@@ -1,45 +1,42 @@
 import java.io.*;
 import java.util.*;
 public class A {
-    static int t;
     public static void main(String[] args) throws Exception{
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         PrintWriter out = new PrintWriter(System.out);
-        t = Integer.parseInt(in.readLine());
-        for(int i = 0; i < t; i++){
+        int t = Integer.parseInt(in.readLine());
+        for(int tst = 0; tst < t; tst++){
             int n = Integer.parseInt(in.readLine());
-            StringTokenizer st = new StringTokenizer(in.readLine());
-            int[] p = new int[n];
-            int[] sum = new int[n - 1];
-            for(int j = 0; j < n; j++){
-                p[j] = Integer.parseInt(st.nextToken());
+            String m = in.readLine();
+            boolean rHasOdd = false;
+            for(int i = 0; i < n; i += 2){
+                if((m.charAt(i) - 48) % 2 == 1){
+                    rHasOdd = true;
+                    break;
+                }
             }
-            for(int j = 0; j < n/2; j++){
-                int tmp = p[j];
-                p[j] = p[n - 1 - j];
-                p[n - 1 - j] = tmp;
+            boolean bHasEven = false;
+            for(int i = 1;i < n; i += 2){
+                if((m.charAt(i) - 48) % 2 == 0){
+                    bHasEven = true;
+                    break;
+                }
             }
-            for(int j: p){
-                out.print(j + " ");
+            if(!rHasOdd){
+                out.println(2);
             }
-            out.println();
+            else if(!bHasEven){
+                out.println(1);
+            }
+            else{
+                if(n % 2 == 0) {
+                    out.println(2);
+                }
+                else{
+                    out.println(1);
+                }
+            }
         }
         out.close();
     }
-    static boolean valid(int[] c){
-        Set<Integer> s = new HashSet<>();
-        for(int i: c){
-            s.add(i);
-        }
-        if(s.size() != c.length){
-            return false;
-        }
-        for(int i: c){
-            if(i <= 0 || i > c.length){
-                return false;
-            }
-        }
-        return true;
-    }
-
 }
