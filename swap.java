@@ -1,125 +1,80 @@
-import java.util.*;
-
 import java.io.*;
-public class swap { 
+import java.util.*;
+public class swap {
+    static int n, m, k;
+    static int[] a;
+    static List<ArrayList<Integer>> adjList = new ArrayList<>(), cycles = new ArrayList<>();
+    static boolean done = false;
     static boolean[] visited;
-    static List<ArrayList<Integer>> chains = new ArrayList<ArrayList<Integer>>();
-    public static void findCycle(int st, int[] map, int index){
-        Stack<Integer> todo = new Stack<Integer>();
-        todo.push(st);
-        while(!todo.isEmpty()){
-            int node = todo.pop();
-            if(visited[node] == true){
+    static void findCycle(int node, int ind) {
+        cycles.get(ind).add(node);
+        visited[node] = true;
+        List<Integer> adj = adjList.get(node);
+        for(int i: adj){
+            if(!visited[i]){
+                findCycle(i, ind);
+                if(done){
+                    return;
+                }
+            }
+            else{
+                done = true;
                 return;
             }
-            visited[node] = true;
-            chains.get(index).add(node);
-            todo.add(map[node]);
         }
-        return;
     }
     public static void main(String[] args) throws Exception{
-        FileReader reader = new FileReader("swap.in");
-        BufferedReader in = new BufferedReader(reader);
+        BufferedReader in = new BufferedReader(new FileReader("swap.in"));
+        PrintWriter out = new PrintWriter(new File("swap.out"));
         StringTokenizer st = new StringTokenizer(in.readLine());
-        int n = Integer.parseInt(st.nextToken());
-        int m = Integer.parseInt(st.nextToken());
-        int k = Integer.parseInt(st.nextToken());
-        List<reverse> swaps = new ArrayList<reverse>();
+        n = Integer.parseInt(st.nextToken());
+        m = Integer.parseInt(st.nextToken());
+        k = Integer.parseInt(st.nextToken());
+        a = new int[n];
+        for(int i = 1; i <= n; i++){
+            a[i - 1] = i;
+        }
         for(int i = 0; i < m; i++){
             st = new StringTokenizer(in.readLine());
-            int a = Integer.parseInt(st.nextToken());
-            int b = Integer.parseInt(st.nextToken());
-            swaps.add(new reverse(a, b));
+            int l = Integer.parseInt(st.nextToken()), r = Integer.parseInt(st.nextToken());
+            rev(l - 1, r - 1);
         }
         in.close();
-
-        int[] map = new int[n + 1];
-        int[] line = new int[n + 1];
-        for(int i = 1; i <= n; i++){
-            line[i] = i;
-        }
-        File out = new File("swap.out");
-        FileWriter writer = new FileWriter(out);
-        for(int i = 0; i < m; i++){
-            reverse curr = swaps.get(i);
-            int start = curr.a; int end = curr.b;
-            while(start < end){
-                int temp = line[start];
-                line[start] = line[end];
-                line[end] = temp;
-                end--;
-                start++;
-            }
-        }
-        for(int i = 1; i <= n; i++){
-            map[line[i]] = i;
-        } 
         visited = new boolean[n + 1];
-        int[] whichChain = new int[n + 1];
-        int[] chainPos = new int[n + 1];
-        int max = -1;
-        int index = 0;
-        List<Integer> sizes = new ArrayList<Integer>();
-        for(int i = 1; i <= n; i++){
-            if(visited[i] == false){
-                chains.add(new ArrayList<Integer>());
-                findCycle(i, map, index);
-                if(chains.get(index).size() > max){
-                    max = chains.get(index).size();
-                }
-                if(chains.get(index).size() != 1){
-                    sizes.add(chains.get(index).size());
-                }
-                index++;
-            }
+        for(int i = 0; i <= n; i++){
+            adjList.add(new ArrayList<>());
         }
-        for(int i = 0; i < chains.size(); i++){
-            for(int j = 0; j < chains.get(i).size(); j++){
-                whichChain[chains.get(i).get(j)] = i;
-                chainPos[chains.get(i).get(j)] = j;
-            }
-        }
-        long mod = findGCD(sizes, k);
-        int amount = (int)(k % mod);
-        int[] ans = new int[n + 1];
-        for(int i = 1; i <= n; i++){
-            List<Integer> chain = chains.get(whichChain[i]);
-            int pos = chainPos[i];
-            int ind = pos + amount;
-            if(ind >= chain.size()){
-                ind = ind % chain.size();
-            }
-            ans[chain.get(ind)] = i;
+        for(int i = 0; i < n; i++){
+            adjList.get(a[i]).add(i + 1);
         }
         for(int i = 1; i <= n; i++){
-            writer.write(Integer.toString(ans[i]) + "\n");
-        }
-        writer.close();
-    }
-    public static long GCD(long a, long b){
-        if(b == 0){
-            return a;
-        }
-        return GCD(b, a % b);
-    }
-    public static long findGCD(List<Integer> sizes, int k){
-        long res = sizes.get(0);
-        for(int i: sizes){
-            if(res > k){
-                return res;
+            if(!visited[i]){
+                cycles.add(new ArrayList<>());
+                findCycle(i, cycles.size() - 1);
             }
-            res = (res * i)/(GCD(i, res));
         }
-        return res;
+        int[] cycleInd = new int[n + 1], posInCycle = new int[n + 1];
+        for(int i = 0; i < cycles.size(); i++){
+            for(int j = 0; j < cycles.get(i).size(); j++){
+                cycleInd[cycles.get(i).get(j)] = i;
+                posInCycle[cycles.get(i).get(j)] = j;
+            }
+        }
+        int[] ans = new int[n];
+        for(int i = 1; i <= n; i++){
+            int index = (posInCycle[i] + k) % cycles.get(cycleInd[i]).size();
+            ans[cycles.get(cycleInd[i]).get(index) - 1] = i;
+        }
+        for(int i: ans){
+            out.println(i);
+        }
+        out.close();
     }
-}
-
-class reverse{
-    int a;
-    int b;
-    public reverse(int a, int b){
-        this.a = a;
-        this.b = b;
+    static void rev(int l, int r){
+        for(int i = l; i <= (l + r)/2; i++){
+            int tmp = a[i];
+            a[i] = a[r - i + l];
+            a[r - i + l] = tmp;
+        }
     }
 }
