@@ -1,32 +1,31 @@
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
-
+import java.io.*;
+import java.util.*;
 public class lemonade {
-    public static void main(String[] args) throws Exception {
-        FileReader file = new FileReader("lemonade.in");
-        Scanner in = new Scanner(file);
-        int n = in.nextInt();
-        int[] cows = new int[n];
+    static int n;
+    static int[] a;
+    public static void main(String[] args) throws Exception{
+        BufferedReader in = new BufferedReader(new FileReader("lemonade.in"));
+        PrintWriter out = new PrintWriter(new File("lemonade.out"));
+        n = Integer.parseInt(in.readLine());
+        a = new int[n];
+        StringTokenizer st = new StringTokenizer(in.readLine());
         for(int i = 0; i < n; i++){
-            cows[i] = in.nextInt();
+            a[i] = Integer.parseInt(st.nextToken());
         }
-        Arrays.sort(cows);
-        List<Integer> line = new ArrayList<Integer>();
-        for(int i = cows.length - 1; i >= 0; i--){
-            int curr = cows[i];
-            if(curr >= line.size()){
-                line.add(curr);
+        in.close();
+        Arrays.sort(a);
+        for(int i = 0; i <= n/2; i++){
+            int tmp = a[i];
+            a[i] = a[n - i - 1];
+            a[n - i - 1] = tmp;
+        }
+        int ans = 0;
+        for(int i: a){
+            if(i >= ans){
+                ans++;
             }
         }
-        File file3 = new File("lemonade.out");
-		FileWriter writer = new FileWriter(file3);
-        writer.write(Integer.toString(line.size()));
-        in.close();
-        writer.close();
+        out.println(ans);
+        out.close();
     }
 }
