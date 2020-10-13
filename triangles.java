@@ -2,15 +2,13 @@ import java.io.*;
 import java.util.*;
 public class triangles {
     static int n;
-    static int mod = (int)(1e9 + 7);
     static List<point> points = new ArrayList<>();
-    static TreeMap<Integer, List<Integer>> mapX = new TreeMap<>(), mapY = new TreeMap<>(); //mapX: (x -> y's); mapY: (y -> x's)
-    static TreeMap<Integer, List<Integer>> PSX = new TreeMap<>(), PSY = new TreeMap<>();
+    static Map<Integer, List<Integer>> yOnX = new HashMap<>(), xOnY = new HashMap<>();
+    static Map<Integer, List<Integer>> yOnXPS = new HashMap<>(), xOnYPS = new HashMap<>();
+    static final int mod = (int)1e9 + 7;
     public static void main(String[] args) throws Exception{
-        FileReader reader = new FileReader("triangles.in");
-        BufferedReader in = new BufferedReader(reader);
-        File out = new File("triangles.out");
-        PrintWriter writer = new PrintWriter(out);
+        BufferedReader in = new BufferedReader(new FileReader("triangles.in"));
+        PrintWriter out = new PrintWriter(new File("triangles.out"));
         n = Integer.parseInt(in.readLine());
         for(int i = 0; i < n; i++){
             StringTokenizer st = new StringTokenizer(in.readLine());
@@ -18,67 +16,66 @@ public class triangles {
             points.add(new point(x, y));
         }
         in.close();
-
         for(point i: points){
-            List<Integer> put;
-            put = (mapX.containsKey(i.x)) ? mapX.get(i.x) : new ArrayList<>();
-            put.add(i.y);
-            mapX.put(i.x, put);
-            List<Integer> put1;
-            put1 = (mapY.containsKey(i.y)) ? mapY.get(i.y) : new ArrayList<>();
-            put1.add(i.x);
-            mapY.put(i.y, put1);
+            List<Integer> l = (!yOnX.containsKey(i.x)) ? new ArrayList<>() : yOnX.get(i.x);
+            l.add(i.y);
+            yOnX.put(i.x, l);
         }
-        for(int i: mapX.keySet()){
-            List<Integer> put = mapX.get(i);
-            Collections.sort(put);
-            mapX.put(i, put);
+        for(point i: points){
+            List<Integer> l = (!xOnY.containsKey(i.y)) ? new ArrayList<>() : xOnY.get(i.y);
+            l.add(i.x);
+            xOnY.put(i.y, l);
         }
-        for(int i: mapY.keySet()){
-            List<Integer> put = mapY.get(i);
-            Collections.sort(put);
-            mapY.put(i, put);
+        for(int i: yOnX.keySet()){
+            List<Integer> l = yOnX.get(i);
+            Collections.sort(l);
+            yOnX.put(i, l);
         }
-        for(int i: mapX.keySet()){
-            List<Integer> put = mapX.get(i);
-            List<Integer> PS = new ArrayList<>();
-            PS.add(put.get(0));
-            for(int j = 1; j < put.size(); j++){
-                PS.add(PS.get(j - 1) + put.get(j));
+        for(int i: xOnY.keySet()){
+            List<Integer> l = xOnY.get(i);
+            Collections.sort(l);
+            xOnY.put(i, l);
+        }
+        for(int i: yOnX.keySet()){
+            List<Integer> l = new ArrayList<>();
+            for(int j = 0; j < yOnX.get(i).size(); j++){
+                if(j == 0){
+                    l.add(yOnX.get(i).get(0));
+                }
+                else{
+                    l.add(yOnX.get(i).get(j) + l.get(j - 1));
+                }
             }
-            PSX.put(i, PS);
+            yOnXPS.put(i, l);
         }
-        for(int i: mapY.keySet()){
-            List<Integer> put = mapY.get(i);
-            List<Integer> PS = new ArrayList<>();
-            PS.add(put.get(0));
-            for(int j = 1; j < put.size(); j++){
-                PS.add(PS.get(j - 1) + put.get(j));
+        for(int i: xOnY.keySet()){
+            List<Integer> l = new ArrayList<>();
+            for(int j = 0; j < xOnY.get(i).size(); j++){
+                if(j == 0){
+                    l.add(xOnY.get(i).get(0));
+                }
+                else{
+                    l.add(xOnY.get(i).get(j) + l.get(j - 1));
+                }
             }
-            PSY.put(i, PS);
+            xOnYPS.put(i, l);
         }
         long ans = 0;
         for(point i: points){
-            List<Integer> currX = mapX.get(i.x), currY = mapY.get(i.y);
-            List<Integer> currPSX = PSX.get(i.x), currPSY = PSY.get(i.y);
-            int posX = Collections.binarySearch(currY, i.x);
-            int posY = Collections.binarySearch(currX, i.y);
-            int XRsum = currPSY.get(currPSY.size() - 1) - currPSY.get(posX);
-            int XLsum = (posX > 0) ? currPSY.get(posX - 1) : 0;
-            if(posX > 0) {
-                XLsum = currPSY.get(posX - 1);
-            }
-            int YRsum = currPSX.get(currPSX.size() - 1) - currPSX.get(posY);
-            int YLsum = (posY > 0) ? currPSX.get(posY - 1) : 0;
-            long xSum = (XRsum - i.x * (currY.size() - 1 - posX)) + Math.abs(XLsum - i.x * posX);
-            long ySum = (YRsum - i.y * (currX.size() - 1 - posY)) + Math.abs(YLsum - i.y * posY);
-            ans += (xSum % mod) * (ySum % mod);
+            List<Integer> xOnYPS1 = xOnYPS.get(i.y);
+            List<Integer> yOnXPS1 = yOnXPS.get(i.x);
+            int posX = Collections.binarySearch(xOnY.get(i.y), i.x);
+            int posY = Collections.binarySearch(yOnX.get(i.x), i.y);
+            long lx = (posX == 0) ? 0 : Math.abs(xOnYPS1.get(posX - 1) - (posX * i.x));
+            long rx = Math.abs((xOnYPS1.get(xOnYPS1.size() - 1) - (xOnYPS1.get(posX))) - ((xOnYPS1.size() - posX - 1) * i.x));
+            long ly = (posY == 0) ? 0 : Math.abs(yOnXPS1.get(posY - 1) - (posY * i.y));
+            long ry = Math.abs((yOnXPS1.get(yOnXPS1.size() - 1) - (yOnXPS1.get(posY))) - ((yOnXPS1.size() - posY - 1) * i.y));
+            ans += (((lx + rx) % mod) * ((ly + ry) % mod)) % mod;
         }
-        writer.println(ans % mod);
-        writer.close();
+        out.println(ans % mod);
+        out.close();
     }
 }
-
 class point{
     int x, y;
     public point(int x, int y){
