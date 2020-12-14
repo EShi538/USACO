@@ -1,44 +1,37 @@
-import java.util.*;
 import java.io.*;
+import java.util.*;
 public class highcard {
-    public static void main(String[] args) throws Exception {
-        FileReader reader = new FileReader("highcard.in");
-        BufferedReader in = new BufferedReader(reader);
-        int n = Integer.parseInt(in.readLine());
-        int[] elsieCards = new int[n];
-        int[] bessieCards = new int[n];
-        boolean[] taken = new boolean[2*n + 1];
+    static int n;
+    static int[] e, b;
+    public static void main(String[] args) throws Exception{
+        BufferedReader in = new BufferedReader(new FileReader("highcard.in"));
+        PrintWriter out = new PrintWriter(new File("highcard.out"));
+        n = Integer.parseInt(in.readLine());
+        e = new int[n]; b = new int[n];
         for(int i = 0; i < n; i++){
-            elsieCards[i] = Integer.parseInt(in.readLine());
-            taken[elsieCards[i]] = true;
+            e[i] = Integer.parseInt(in.readLine());
         }
         in.close();
-
-        int index = 0;
+        Arrays.sort(e);
+        int ind = 0;
         for(int i = 1; i <= 2 * n; i++){
-            if(taken[i] == false){
-                bessieCards[index] = i;
-                index++;
+            if(!(Arrays.binarySearch(e, i) >= 0)){
+                b[ind] = i;
+                ind++;
             }
         }
-        Arrays.sort(bessieCards);
-        Arrays.sort(elsieCards);
-        int bessieInd = 0;
-        int elsieInd = 0;
+        int pe = 0, pb = 0;
         int ans = 0;
-        while(bessieInd < n && elsieInd < n){
-            if(bessieCards[bessieInd] > elsieCards[elsieInd]){
-                bessieInd++;
-                elsieInd++;
+        while(pe < n && pb < n){
+            if(b[pb] > e[pe]){
+                pb++; pe++;
                 ans++;
             }
             else{
-                bessieInd++;
+                pb++;
             }
         }
-        File out = new File("highcard.out");
-        FileWriter writer = new FileWriter(out);
-        writer.write(Integer.toString(ans));
-        writer.close();
+        out.println(ans);
+        out.close();
     }
 }
