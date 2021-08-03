@@ -1,11 +1,11 @@
 import java.io.*;
 import java.util.*;
-public class moocast {
+public class moocastGold {
     static int n;
     static List<coordinate1> coordinates = new ArrayList<>();
     static boolean[] visited;
     public static void main(String[] args) throws Exception{
-        BufferedReader in = new BufferedReader(new FileReader("moocast.in"));
+        BufferedReader in = new BufferedReader(new FileReader("moocastGold.in"));
         n = Integer.parseInt(in.readLine());
         coordinates.add(new coordinate1(-1, -1));
         for(int i = 0; i < n; i++){
@@ -28,7 +28,7 @@ public class moocast {
                 l = m + 1;
             }
         }
-        FileWriter out = new FileWriter("moocast.out");
+        FileWriter out = new FileWriter("moocastGold.out");
         out.write(Long.toString(ans));
         out.close();
     }
