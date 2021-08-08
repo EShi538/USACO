@@ -1,69 +1,130 @@
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+import java.util.StringTokenizer;
+
 public class wormsort {
-    static int n, m;
-    static int[] p;
-    static List<ArrayList<connection1>> adjList = new ArrayList<>();
-    static boolean[] visited;
+    static List<ArrayList<connection1>> adjList = new ArrayList<ArrayList<connection1>>();
+    static boolean[] visited = new boolean[0];
+    static List<position> nodes = new ArrayList<position>();
     public static void main(String[] args) throws Exception{
-        BufferedReader in = new BufferedReader(new FileReader("wormsort.in"));
+        FileReader reader = new FileReader("wormsort.in");
+        BufferedReader in = new BufferedReader(reader);
         StringTokenizer st = new StringTokenizer(in.readLine());
-        n = Integer.parseInt(st.nextToken());
-        m = Integer.parseInt(st.nextToken());
-        p = new int[n];
+        int n = Integer.parseInt(st.nextToken());
+        int m = Integer.parseInt(st.nextToken());
+        visited = new boolean[n + 1];
+        int[] cows = new int[n + 1];
         st = new StringTokenizer(in.readLine());
-        for(int i = 0; i < n; i++){
-            p[i] = Integer.parseInt(st.nextToken());
+        for(int i = 1; i <= n; i++){
+            cows[i] = Integer.parseInt(st.nextToken());
         }
         for(int i = 0; i <= n; i++){
             adjList.add(new ArrayList<connection1>());
         }
-        for(int i = 0; i < m; i++){
+        int max = -1;
+        for(int i = 1; i <= m; i++){
             st = new StringTokenizer(in.readLine());
-            int a = Integer.parseInt(st.nextToken()), b = Integer.parseInt(st.nextToken());
+            int a = Integer.parseInt(st.nextToken());
+            int b = Integer.parseInt(st.nextToken());
             int w = Integer.parseInt(st.nextToken());
-            adjList.get(a).add(new connection1(b, w)); adjList.get(b).add(new connection1(a, w));
+            if(w > max){
+                max = w;
+            }
+            adjList.get(a).add(new connection1(b, w));
+            adjList.get(b).add(new connection1(a, w));
         }
         in.close();
-        long l = 0, r = Integer.MAX_VALUE;
-        long ans = -1;
-        while(l <= r){
-            long m = (l + r)/2;
-            visited = new boolean[n + 1];
-            dfs(1, m);
-            if(valid()){
-                l = m + 1;
-                ans = Math.max(ans, m);
+
+        File out = new File("wormsort.out");
+        FileWriter writer = new FileWriter(out);
+        boolean good = true;
+        for(int i = 1; i <= n; i++){
+            if(cows[i] != i){
+                good = false;
+                break;
+            }
+        }
+        if(good == true){
+            writer.write("-1");
+            writer.close();
+            return;
+        }
+
+        nodes.add(new position(0));
+        for(int i = 1; i <= n; i++){
+            nodes.add(new position(i));
+        }
+        int lb = 0; int ub = max;
+        int best = -1;
+        while(lb < ub){
+            int mid = (lb + ub)/2;
+            int currReg = 1;
+            for(int i = 1; i <= n; i++){
+                if(nodes.get(i).reg == -1){
+                    floodfill(nodes.get(i).ID, mid, currReg);
+                    currReg++;
+                }
+            }
+            boolean good1 = true;
+            for(int i = 1; i <= n; i++){
+                if(nodes.get(cows[i]).reg != nodes.get(i).reg && cows[i] != i){
+                    good1 = false;
+                    break;
+                }
+            }
+            if(good1 == true){
+                if(mid > best){
+                    best = mid;
+                }
+                lb = mid + 1;
             }
             else{
-                r = m - 1;
+                ub = mid;
             }
+            for(int i = 1; i <= n; i++){
+                nodes.get(i).reg = -1;
+            }
+            visited = new boolean[n + 1];
         }
-        FileWriter out = new FileWriter("wormsort.out");
-        out.write(Long.toString(ans));
-        out.close();
+        writer.write(Integer.toString(best));
+        writer.close();
     }
-    static void dfs(int node, long m){
-        visited[node] = true;
-        for(connection1 i: adjList.get(node)){
-            if(!visited[i.node] && i.connection >= m){
-                dfs(i.node, m);
+    public static void floodfill(int start, int mid, int reg){
+        Stack<Integer> st = new Stack<Integer>();
+        st.push(start);
+        while(!st.isEmpty()){
+            int node = st.pop();
+            visited[node] = true;
+            nodes.get(node).reg = reg;
+            ArrayList<connection1> adj = adjList.get(node);
+            for(int i = 0; i < adj.size(); i++){
+                if(adj.get(i).width >= mid && visited[adj.get(i).node] == false){
+                    st.push(adj.get(i).node);
+                }
             }
         }
-    }
-    static boolean valid(){
-        for(boolean i: visited){
-            if(!i){
-                return false;
-            }
-        }
-        return true;
+        return;
     }
 }
 class connection1{
-    int node, connection;
-    public connection1(int node, int connection){
+    int node;
+    int width;
+    public connection1(int node, int width){
         this.node = node;
-        this.connection = connection;
+        this.width = width;
+    }
+}
+
+class position{
+    int ID;
+    int reg;
+    public position(int ID){
+        this.ID = ID;
+        this.reg = -1;
     }
 }
