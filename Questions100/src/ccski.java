@@ -7,7 +7,6 @@ public class ccski {
     static int[] dx = {0, 1, 0, -1}, dy = {-1, 0, 1, 0};
     static List<coordinate2> coordinates = new ArrayList<>();
     public static void main(String[] args) throws Exception{
-        //BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         BufferedReader in = new BufferedReader(new FileReader("ccski.in"));
         StringTokenizer st = new StringTokenizer(in.readLine());
         n = Integer.parseInt(st.nextToken());
@@ -51,7 +50,6 @@ public class ccski {
                 l = mid + 1;
             }
         }
-        //PrintWriter out = new PrintWriter(System.out);
         FileWriter out = new FileWriter("ccski.out");
         out.write(Long.toString(ans));
         out.close();
