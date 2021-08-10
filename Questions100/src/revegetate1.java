@@ -1,6 +1,6 @@
 import java.io.*;
 import java.util.*;
-public class revegetate {
+public class revegetate1 {
     static int n, m;
     static List<ArrayList<edge>> adjList = new ArrayList<>();
     static List<node> nodes = new ArrayList<>();
