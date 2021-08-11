@@ -1,6 +1,6 @@
 import java.io.*;
 import java.util.*;
-public class countcross {
+public class countcrossslow {
     static int n = 0;
     static int k = 0;
     static int r = 0;
