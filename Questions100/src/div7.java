@@ -1,5 +1,4 @@
 import java.io.*;
-import java.util.*;
 public class div7 {
     static int n;
     static int[] a, prefix;
