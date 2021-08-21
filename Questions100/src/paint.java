@@ -1,3 +1,4 @@
+//http://usaco.org/index.php?page=viewproblem2&cpid=1087
 import java.io.*;
 import java.util.*;
 public class paint {
