@@ -1,3 +1,4 @@
+//http://usaco.org/index.php?page=viewproblem2&cpid=1086
 import java.io.*;
 import java.util.*;
 public class danceMoves {
