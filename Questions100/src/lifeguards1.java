@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class lifeguards {
+public class lifeguards1{
     public static void main(String[] args) throws Exception{
         FileReader reader = new FileReader("lifeguards.in");
         BufferedReader in = new BufferedReader(reader);

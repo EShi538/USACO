@@ -1,6 +1,6 @@
 import java.util.*;
 import java.io.*;
-public class citystate {
+public class citystate1 {
     public static void main(String[] args) throws Exception{
         FileReader reader = new FileReader("citystate.in");
         BufferedReader in = new BufferedReader(reader);
